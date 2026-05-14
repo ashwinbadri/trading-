@@ -23,12 +23,20 @@ class AiStockAnalysisSkill:
     def analyze(self, symbol: str) -> AiTradeSignal:
         stock_data = self.market_data_provider.get_stock_data(symbol)
 
-        raw_response = self.llm_client.analyze_stock(
-            symbol=stock_data.symbol,
-            current_price=stock_data.current_price,
-            day_change_percent=stock_data.day_change_percent,
-            volume=stock_data.volume
-        )
+        try:
+            raw_response = self.llm_client.analyze_stock(
+                symbol=stock_data.symbol,
+                current_price=stock_data.current_price,
+                day_change_percent=stock_data.day_change_percent,
+                volume=stock_data.volume
+            )
+        except Exception as e:
+            return AiTradeSignal(
+                symbol=symbol.upper(),
+                action="HOLD",
+                confidence=0.0,
+                reason=f"AI analysis unavailable, so defaulted to HOLD. Error: {e}"
+            )
 
         try:
             data = json.loads(raw_response)

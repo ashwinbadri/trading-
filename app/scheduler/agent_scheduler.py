@@ -1,21 +1,16 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from app.models.paper_account import PaperAccount
+from app.memory.account_repository import AccountRepository
 from app.orchestrator.trading_orchestrator import TradingOrchestrator
 
-account = PaperAccount(
-    cash_balance=10_000,
-    positions=[],
-    trades=[]
-)
-
 orchestrator = TradingOrchestrator()
+account_repository = AccountRepository()
 
 watchlist = ["AAPL", "TSLA", "NVDA"]
 
 
 def run_agent_once():
-    global account
+    account = account_repository.get_account()
 
     print("\nRunning scheduled agent loop...")
 
@@ -24,6 +19,8 @@ def run_agent_once():
             account=account,
             symbol=symbol
         )
+
+    account_repository.save_account(account)
 
     print("\nCurrent Portfolio:")
     print(account)

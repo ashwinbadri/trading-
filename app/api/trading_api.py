@@ -1,21 +1,16 @@
 from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException
 
-from app.models.paper_account import PaperAccount
 from app.broker.trading_service import TradingService
+from app.memory.account_repository import AccountRepository
 from app.memory.trade_repository import TradeRepository
 
 
 router = APIRouter()
 
-account = PaperAccount(
-    cash_balance=10_000,
-    positions=[],
-    trades=[]
-)
-
 service = TradingService()
 trade_repo = TradeRepository()
+account_repository = AccountRepository()
 
 
 class TradeRequest(BaseModel):
@@ -26,17 +21,19 @@ class TradeRequest(BaseModel):
 
 @router.post("/buy")
 def buy(request: TradeRequest):
-    global account
-
     try:
-        account = service.buy(
+        account = account_repository.get_account()
+
+        updated_account = service.buy(
             account=account,
             symbol=request.symbol,
             quantity=request.quantity,
             price=request.price
         )
 
-        return account
+        account_repository.save_account(updated_account)
+
+        return updated_account
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -44,17 +41,19 @@ def buy(request: TradeRequest):
 
 @router.post("/sell")
 def sell(request: TradeRequest):
-    global account
-
     try:
-        account = service.sell(
+        account = account_repository.get_account()
+
+        updated_account = service.sell(
             account=account,
             symbol=request.symbol,
             quantity=request.quantity,
             price=request.price
         )
 
-        return account
+        account_repository.save_account(updated_account)
+
+        return updated_account
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -62,7 +61,7 @@ def sell(request: TradeRequest):
 
 @router.get("/portfolio")
 def get_portfolio():
-    return account
+    return account_repository.get_account()
 
 
 @router.get("/trades")

@@ -4,9 +4,14 @@ from openai import OpenAI
 
 
 class LLMClient:
-    client = OpenAI(
-        api_key=os.getenv("OPENAI_API_KEY")
-    )
+
+    def _get_client(self) -> OpenAI:
+        api_key = os.getenv("OPENAI_API_KEY")
+
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY is not set")
+
+        return OpenAI(api_key=api_key)
 
     def analyze_stock(
         self,
@@ -40,7 +45,7 @@ JSON schema:
 }}
 """
 
-        response = self.client.chat.completions.create(
+        response = self._get_client().chat.completions.create(
             model="gpt-4.1-mini",
 
             messages=[

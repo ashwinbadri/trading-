@@ -13,3 +13,9 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
+
+def initialize_database():
+    from app.memory import db_models  # noqa: F401
+
+    Base.metadata.create_all(bind=engine)
