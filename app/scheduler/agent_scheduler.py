@@ -1,7 +1,12 @@
+import os
+
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from app.memory.account_repository import AccountRepository
 from app.orchestrator.trading_orchestrator import TradingOrchestrator
+
+
+SCAN_INTERVAL_MINUTES = int(os.getenv("SCAN_INTERVAL_MINUTES", "5"))
 
 orchestrator = TradingOrchestrator()
 account_repository = AccountRepository()
@@ -28,7 +33,14 @@ def run_agent_once():
 
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(run_agent_once, "interval", seconds=30)
+    scheduler.add_job(
+        run_agent_once,
+        "interval",
+        minutes=SCAN_INTERVAL_MINUTES
+    )
     scheduler.start()
 
-    print("Scheduler started")
+    print(
+        "Scheduler started "
+        f"(interval: {SCAN_INTERVAL_MINUTES} minute(s))"
+    )

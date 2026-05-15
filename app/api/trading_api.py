@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.broker.trading_service import TradingService
 from app.memory.account_repository import AccountRepository
+from app.memory.decision_log_repository import DecisionLogRepository
 from app.memory.trade_repository import TradeRepository
 
 
@@ -11,6 +12,7 @@ router = APIRouter()
 service = TradingService()
 trade_repo = TradeRepository()
 account_repository = AccountRepository()
+decision_log_repository = DecisionLogRepository()
 
 
 class TradeRequest(BaseModel):
@@ -67,3 +69,8 @@ def get_portfolio():
 @router.get("/trades")
 def get_trades():
     return trade_repo.get_all_trades()
+
+
+@router.get("/decisions")
+def get_decisions():
+    return decision_log_repository.get_all_decisions()

@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ValidationError
 
-from app.market.market_data_provider import MarketDataProvider
+from app.market.market_data_provider import StockData
 from app.ai.llm_client import LLMClient
 
 
@@ -17,11 +17,10 @@ class AiTradeSignal(BaseModel):
 class AiStockAnalysisSkill:
 
     def __init__(self):
-        self.market_data_provider = MarketDataProvider()
         self.llm_client = LLMClient()
 
-    def analyze(self, symbol: str) -> AiTradeSignal:
-        stock_data = self.market_data_provider.get_stock_data(symbol)
+    def analyze(self, stock_data: StockData) -> AiTradeSignal:
+        symbol = stock_data.symbol
 
         try:
             raw_response = self.llm_client.analyze_stock(
@@ -32,7 +31,7 @@ class AiStockAnalysisSkill:
             )
         except Exception as e:
             return AiTradeSignal(
-                symbol=symbol.upper(),
+                symbol=symbol,
                 action="HOLD",
                 confidence=0.0,
                 reason=f"AI analysis unavailable, so defaulted to HOLD. Error: {e}"
@@ -42,7 +41,7 @@ class AiStockAnalysisSkill:
             data = json.loads(raw_response)
 
             return AiTradeSignal(
-                symbol=symbol.upper(),
+                symbol=symbol,
                 action=data["action"],
                 confidence=data["confidence"],
                 reason=data["reason"]
@@ -53,7 +52,7 @@ class AiStockAnalysisSkill:
             print(raw_response)
 
             return AiTradeSignal(
-                symbol=symbol.upper(),
+                symbol=symbol,
                 action="HOLD",
                 confidence=0.0,
                 reason=f"AI response was invalid, so defaulted to HOLD. Error: {e}"

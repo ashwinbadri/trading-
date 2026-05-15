@@ -34,3 +34,19 @@ class AgentLogEntity(Base):
     id = Column(String, primary_key=True, index=True)
     message = Column(String, nullable=False)
     timestamp = Column(DateTime, nullable=False)
+
+
+class DecisionLogEntity(Base):
+    __tablename__ = "decision_logs"
+
+    id = Column(String, primary_key=True, index=True)
+    symbol = Column(String, nullable=False, index=True)
+    signal_action = Column(String, nullable=False)
+    signal_confidence = Column(Float, nullable=False)
+    signal_reason = Column(String, nullable=False)
+    risk_approved = Column(String, nullable=False)
+    risk_reason = Column(String, nullable=False)
+    final_action = Column(String, nullable=False)
+    quantity = Column(Float, nullable=False)
+    price = Column(Float, nullable=False)
+    timestamp = Column(DateTime, nullable=False)
